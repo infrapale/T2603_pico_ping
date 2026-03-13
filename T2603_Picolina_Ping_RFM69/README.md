@@ -47,6 +47,6 @@ Sensor Radio Message:   {"Z":"OD_1","S":"Temp","V":23.1,"R":"-"}
 Relay Radio Message     {"Z":"MH1","S":"RKOK1","V":"T","R":"-"}
 Sensor Node Rx Mesage:  <#X1N:OD1;Temp;25.0;->
 Relay Node Rx Mesage:   <#X1N:RMH1;RKOK1;T;->
-Time Message:           <##T1T1=;2026;03;12;10;12>
+Time Message:           <##C1T1=;2026;03;12;10;12>
 Relay Mesage            <#R12=x>   x:  0=off, 1=on, T=toggle
 *******************************************************************************

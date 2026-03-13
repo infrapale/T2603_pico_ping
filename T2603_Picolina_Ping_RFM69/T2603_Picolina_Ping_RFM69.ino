@@ -19,6 +19,7 @@ https://learn.sparkfun.com/tutorials/rfm69hcw-hookup-guide/all
 #include    <time.h>
 #define     PIRPANA
 #include    "secrets.h"
+#include    "main.h"
 #include    <RH_RF69.h>
 #include    "atask.h"
 #include    "Rfm69Modem.h"
@@ -47,6 +48,17 @@ ping_st ping = {0};
 // Finnish timezone (automatic DST)
 const char* TZ_FINLAND = "EET-2EEST,M3.5.0/03,M10.5.0/04";
 
+#define ENCRYPTKEY    RFM69_KEY   // defined in secret.h
+RH_RF69         rf69(PIN_RFM_CS, PIN_RFM_IRQ);
+Rfm69Modem      rfm69_modem(&rf69,  PIN_RFM_RESET, PIN_LED_BLUE );
+modem_data_st   modem_data = {MY_MODULE_TAG, MY_MODULE_ADDR};
+
+
+void modem_task(void);
+atask_st modem_handle              = {"Radio Modem    ", 100,0, 0, 255, 0, 1, modem_task};
+
+
+
 void setup() {
     Serial1.setTX(PIN_TX0);   
     Serial1.setRX(PIN_RX0);
@@ -55,6 +67,13 @@ void setup() {
     delay(1500);
     Serial1.begin(9600);
     ping.state = 0;
+    uint8_t key[] = RFM69_KEY;
+    rfm69_modem.initialize(MY_MODULE_TAG, MY_MODULE_ADDR, key);
+    rfm69_modem.radiate(__APP__);
+    atask_initialize();
+    atask_add_new(&modem_handle);
+
+
 }
 
 void loop() 
@@ -132,9 +151,10 @@ void loop()
             Serial.print("Local Finnish time: ");
             Serial.println(ping.buffer);    
             // <##T1T1=;2026;03;12;10;12>
-            strftime(ping.buffer, sizeof(ping.buffer), "<##T1T1=;%Y;%m;%d;%H;%M>", &ping.timeinfo);
+            strftime(ping.buffer, sizeof(ping.buffer), "<##C1T1=;%Y;%m;%d;%H;%M>", &ping.timeinfo);
             Serial.println(ping.buffer);    
             Serial1.println(ping.buffer);    
+            rfm69_modem.radiate(ping.buffer);
             ping.state = 210;
             ping.next_try = millis() + PING_INTERVAL_ms;
             break;
@@ -149,4 +169,9 @@ void loop()
             break;
 
     }
+}
+
+void modem_task(void)
+{
+    rfm69_modem.modem_task();
 }
