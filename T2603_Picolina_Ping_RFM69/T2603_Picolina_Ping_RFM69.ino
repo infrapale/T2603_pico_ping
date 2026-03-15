@@ -17,9 +17,8 @@ https://learn.sparkfun.com/tutorials/rfm69hcw-hookup-guide/all
 
 #include    <WiFi.h>
 #include    <time.h>
-#define     PIRPANA
-#include    "secrets.h"
 #include    "main.h"
+#include    "secrets.h"
 #include    <RH_RF69.h>
 #include    "atask.h"
 #include    "Rfm69Modem.h"
@@ -28,6 +27,7 @@ https://learn.sparkfun.com/tutorials/rfm69hcw-hookup-guide/all
 #define PIN_TX0         (0u)
 #define PIN_RX0         (1u)
 #define PING_INTERVAL_ms  (60*1000)
+#define IO_TICK_INTERVAL    (100)
 
 const char* ssid     = WIFI_SSID;
 const char* password = WIFI_PASS;
@@ -38,10 +38,13 @@ typedef struct
     uint16_t prev_state;
     uint16_t retry_cntr;
     uint32_t next_try;
+    uint32_t wait_until;
     time_t   now;
     struct tm timeinfo;
     char    buffer[64];
+    uint32_t next_io_tick;
 } ping_st;
+
 
 ping_st ping = {0};
 
@@ -72,8 +75,11 @@ void setup() {
     rfm69_modem.radiate(__APP__);
     atask_initialize();
     atask_add_new(&modem_handle);
+}
 
-
+void setup1(){
+    io_initialize();
+    ping.next_io_tick = millis() + IO_TICK_INTERVAL;
 }
 
 void loop() 
@@ -85,10 +91,17 @@ void loop()
     switch(ping.state)
     {
         case 0:
-            ping.state = 10;
+            ping.state = 5;
+            ping.wait_until = millis() + 3200;
+            io_led_flash(COLOR_BLUE, BLINK_JITTER_1, 40);            
+            io_led_flash(COLOR_YELLOW, BLINK_JITTER_2, 40);            
+            io_led_flash(COLOR_RED, BLINK_JITTER_3, 40);
             break;
+        case 5:
+            if(millis() > ping.wait_until) ping.state = 10;
         case 10:
-            Serial.println("Connecting to WiFi...");
+            io_led_flash(COLOR_YELLOW, BLINK_FAST, 50);
+            Serial.printf("Connecting to WiFi...%s\n", ssid);
             WiFi.begin(ssid, password);
             ping.retry_cntr = 0;
             ping.state = 20;
@@ -96,23 +109,31 @@ void loop()
         case 20:
             if(WiFi.status() == WL_CONNECTED)
             {
+                io_led_flash(COLOR_YELLOW, BLINK_1_FLASH, BLINK_FOREVER);                
                 Serial.printf("WiFi is connected, Retries= %d\n",ping.retry_cntr);
                 Serial.print("IP: ");
                 Serial.println(WiFi.localIP());
                 ping.state = 100;
             }
-            else
+            else {
+                ping.wait_until = millis() + 250;
+                ping.state = 30;
+            }
+            break;
+        case 30:
+            if(millis() > ping.wait_until)
             {
-                delay(250);
                 Serial.printf("-%d",ping.retry_cntr);
                 ping.retry_cntr++;
                 if(ping.retry_cntr > 40) 
                 {
-                    Serial.printf("WiFi Connection Reries was Exceeded: %d", ping.retry_cntr);
+                    Serial.printf("WiFi Connection Retries was Exceeded: %d", ping.retry_cntr);
                     ping.state = 50;
+                    io_led_flash(COLOR_RED, BLINK_SOS, BLINK_FOREVER);
                 }
+                else ping.state = 20;
             }
-            break;
+            break;           
         case 50:
             ping.state = 0;
             break;
@@ -130,11 +151,20 @@ void loop()
         case 110:
             // Wait up to 10 seconds for NTP sync
             time(&ping.now);
-            if(ping.now > 100000) ping.state = 200;
-            else{
-                delay(100);
-                if(ping.retry_cntr > 100) ping.state = 120;
+            if(ping.now > 100000) {
+                io_led_flash(COLOR_BLUE, BLINK_JITTER_1, 40);
+                ping.state = 200;
             }
+            else{
+                ping.wait_until = millis() + 100;
+                ping.state = 112;
+            }
+            break;
+        case 112:
+             if(millis() > ping.wait_until){
+                if(ping.retry_cntr > 100) ping.state = 120;
+                else ping.state = 110;
+             }
             break;
         case 120:  
             Serial.println("NTP FAILED (no internet?)");
@@ -171,7 +201,17 @@ void loop()
     }
 }
 
+void loop1()
+{
+    if(millis() > ping.next_io_tick){
+        ping.next_io_tick = millis() + IO_TICK_INTERVAL;
+        io_task();
+    }
+}
+
 void modem_task(void)
 {
     rfm69_modem.modem_task();
 }
+
+
