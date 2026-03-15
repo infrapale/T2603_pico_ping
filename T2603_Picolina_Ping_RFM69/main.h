@@ -23,11 +23,17 @@
 #define SerialX Serial
 #endif
 
-#define TASK_NBR_OF  3
-#define LED_INDICATION
+//#define TASK_NBR_OF  3
+//#define LED_INDICATION
 
 #define MY_MODULE_TAG   'R'
 #define MY_MODULE_ADDR  '1'
+
+typedef struct
+{
+    uint32_t next_io_tick;
+} main_ctrl_st;
+
 
 typedef struct
 {

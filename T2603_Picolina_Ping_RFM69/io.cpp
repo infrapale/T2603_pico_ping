@@ -28,6 +28,8 @@ led_st led[COLOR_NBR_OF] =
     {PIN_LED_BLUE, 0, 0, false},
 };
 
+
+
 const uint32_t led_pattern[BLINK_NBR_OF] = 
 {
     [BLINK_OFF]       = 0b00000000000000000000000000000000,
@@ -42,8 +44,6 @@ const uint32_t led_pattern[BLINK_NBR_OF] =
     [BLINK_JITTER_1]  = 0b10101010101010101010101010101010,
     [BLINK_JITTER_2]  = 0b10010010010010010010010010010010,
     [BLINK_JITTER_3]  = 0b10001000100010001000100010001000,
-
-
 };
 
 void io_task(void);
