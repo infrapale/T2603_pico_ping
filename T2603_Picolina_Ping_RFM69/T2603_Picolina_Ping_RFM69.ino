@@ -15,24 +15,22 @@ https://learn.sparkfun.com/tutorials/rfm69hcw-hookup-guide/all
 *******************************************************************************
 **/
 
-#include    <WiFi.h>
-#include    <time.h>
 #include    "main.h"
 #include    "secrets.h"
 #include    <RH_RF69.h>
-#include    "atask.h"
 #include    "Rfm69Modem.h"
+#include    "atask.h"
 #include    "io.h"
 #include    "ping.h"
 
-#define PIN_TX0         (0u)
-#define PIN_RX0         (1u)
+#define PIN_TX0             (0u)
+#define PIN_RX0             (1u)
 
 #define IO_TICK_INTERVAL    (100)
 
 #define ENCRYPTKEY    RFM69_KEY   // defined in secret.h
 RH_RF69         rf69(PIN_RFM_CS, PIN_RFM_IRQ);
-Rfm69Modem      rfm69_modem(&rf69,  PIN_RFM_RESET, PIN_LED_BLUE );
+Rfm69Modem      rfm69_modem(&rf69,  PIN_RFM_RESET, -1 );
 modem_data_st   modem_data = {MY_MODULE_TAG, MY_MODULE_ADDR};
 
 main_ctrl_st ctrl = {0};
