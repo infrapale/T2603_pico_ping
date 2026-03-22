@@ -99,7 +99,7 @@ void ping_task(void)
             }
             break;           
         case 50:
-            ping.state = 0;
+            ping.state = 300;
             break;
         case 100:
           // Set timezone
@@ -159,9 +159,17 @@ void ping_task(void)
             }
             break;    
         case 300:
-            ping.state = 10;
+            ping.wait_until = millis() + 10000;
+            digitalWrite(PIN_RELAY, HIGH);
+            io_led_flash(COLOR_YELLOW, BLINK_JITTER_3, BLINK_FOREVER); 
+            ping.state = 310;
             break;
-
+        case 310:
+            if(millis() > ping.wait_until){
+                digitalWrite(PIN_RELAY, LOW);
+                ping.state = 0;
+            }
+            break;
     }
 
 }

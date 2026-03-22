@@ -25,7 +25,7 @@
 #define PIN_LED_YELLOW  (11u)
 #define PIN_LED_BLUE    (12u)
 
-#define PIN_GP13        (13u)
+#define PIN_RELAY       (13u)
 #define PIN_GP14        (14u)
 #define PIN_GP15        (15u)
 // RFM69

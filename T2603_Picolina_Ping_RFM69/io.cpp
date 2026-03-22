@@ -56,6 +56,8 @@ void io_initialize(void)
   //RFM95 Reset
   pinMode(PIN_RFM_RESET, OUTPUT);
   digitalWrite(PIN_RFM_RESET, HIGH);
+  pinMode(PIN_RELAY, OUTPUT);
+  digitalWrite(PIN_RFM_RESET, LOW);
 
   io_ctrl.pattern_bit = 0;
   for (uint8_t i = COLOR_RED; i <= COLOR_BLUE; i++)
@@ -82,7 +84,6 @@ void io_led_flash(color_et color, blink_et bindx, uint16_t tick_nbr)
 
 void io_task(void)
 {
-
     uint32_t patt = 1UL << io_ctrl.pattern_bit;
     for (uint8_t i = COLOR_RED; i <= COLOR_BLUE; i++)
     {
