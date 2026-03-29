@@ -4,9 +4,9 @@
 #define   __APP__ ((char*)"T2603_Picolina_Ping_RFM69")
 
 // WiFi Access Point
-#define PIRPANA
+// #define PIRPANA
 // #define LILLA_ASTRID
-//#define VILLA_ASTRID
+#define VILLA_ASTRID
 
 #define DEBUG_PRINT 
 #define SEND_TEST_MSG 
@@ -32,7 +32,15 @@
 typedef struct
 {
     uint32_t next_io_tick;
+    uint32_t next_comm_tick;
 } main_ctrl_st;
+
+
+typedef struct 
+{
+    uint16_t restart_cntr;
+    uint16_t router_restart_cntr;
+} main_data_st;
 
 
 typedef struct

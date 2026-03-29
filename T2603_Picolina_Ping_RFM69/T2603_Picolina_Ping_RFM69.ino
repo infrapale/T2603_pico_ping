@@ -14,7 +14,7 @@ https://learn.sparkfun.com/tutorials/rfm69hcw-hookup-guide/all
 
 *******************************************************************************
 **/
-
+#include    "Wire.h"
 #include    "main.h"
 #include    "secrets.h"
 #include    <RH_RF69.h>
@@ -22,11 +22,15 @@ https://learn.sparkfun.com/tutorials/rfm69hcw-hookup-guide/all
 #include    "atask.h"
 #include    "io.h"
 #include    "ping.h"
+#include    "eeprom.h"
+#include    "comm.h"
 
 #define PIN_TX0             (0u)
 #define PIN_RX0             (1u)
 
 #define IO_TICK_INTERVAL    (100)
+#define COMM_TICK_INTERVAL  (100)
+
 
 #define ENCRYPTKEY    RFM69_KEY   // defined in secret.h
 RH_RF69         rf69(PIN_RFM_CS, PIN_RFM_IRQ);
@@ -34,29 +38,45 @@ Rfm69Modem      rfm69_modem(&rf69,  PIN_RFM_RESET, -1 );
 modem_data_st   modem_data = {MY_MODULE_TAG, MY_MODULE_ADDR};
 
 main_ctrl_st ctrl = {0};
-
+main_data_st main_data;
 void modem_task(void);
+void print_debug_task(void);
+
 atask_st modem_handle              = {"Radio Modem    ", 100,0, 0, 255, 0, 1, modem_task};
+atask_st debug_th                  = {"Debug Task     ", 2000,    0,     0,  255,    0,  1,  print_debug_task };
 
 
 void setup() {
     Serial1.setTX(PIN_TX0);   
     Serial1.setRX(PIN_RX0);
 
-    Serial.begin(115200);
-    delay(1500);
+    Serial.begin(9600);
+    delay(2500);
     Serial1.begin(9600);
+
+    Wire1.setSDA(PIN_I2C1_SDA);
+    Wire1.setSCL(PIN_I2C1_SCL);
+    Wire1.begin();
     uint8_t key[] = RFM69_KEY;
     atask_initialize();
     ping_initialize();
     rfm69_modem.initialize(MY_MODULE_TAG, MY_MODULE_ADDR, key);
     rfm69_modem.radiate(__APP__);
     atask_add_new(&modem_handle);
+    atask_add_new(&debug_th);
+    comm_initialize();
+    eeprom_initialize();
+    eeprom_load_main_data();
+    main_data.restart_cntr++;
+    eeprom_save_main_data();
+    ping_print_main_data();
+
 }
 
 void setup1(){
     io_initialize();
     ctrl.next_io_tick = millis() + IO_TICK_INTERVAL;
+    ctrl.next_comm_tick = millis() + COMM_TICK_INTERVAL;
 }
 
 void loop() 
@@ -70,6 +90,11 @@ void loop1()
         ctrl.next_io_tick = millis() + IO_TICK_INTERVAL;
         io_task();
     }
+    if(millis() > ctrl.next_comm_tick){
+        ctrl.next_comm_tick = millis() + COMM_TICK_INTERVAL;
+        comm_task();
+    }
+
 }
 
 void modem_task(void)
@@ -77,4 +102,9 @@ void modem_task(void)
     rfm69_modem.modem_task();
 }
 
+
+void print_debug_task(void)
+{
+  atask_print_status(true);
+}
 

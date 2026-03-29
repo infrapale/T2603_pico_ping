@@ -2,6 +2,8 @@
 #include "atask.h"
 #include "main.h"
 #include "io.h"
+#include "eeprom.h"
+
 
 typedef struct
 {
@@ -57,7 +59,7 @@ void io_initialize(void)
   pinMode(PIN_RFM_RESET, OUTPUT);
   digitalWrite(PIN_RFM_RESET, HIGH);
   pinMode(PIN_RELAY, OUTPUT);
-  digitalWrite(PIN_RFM_RESET, LOW);
+  digitalWrite(PIN_RELAY, HIGH);
 
   io_ctrl.pattern_bit = 0;
   for (uint8_t i = COLOR_RED; i <= COLOR_BLUE; i++)

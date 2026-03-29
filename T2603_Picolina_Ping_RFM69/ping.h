@@ -3,4 +3,6 @@
 
 void ping_initialize(void);
 
+void ping_print_main_data(void);
+
 #endif
