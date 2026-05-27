@@ -54,6 +54,11 @@ void setup() {
     delay(2500);
     Serial1.begin(9600);
 
+    SPI.setSCK( PIN_RFM_SCK );   
+    SPI.setTX( PIN_RFM_MOSI ); 
+    SPI.setRX( PIN_RFM_MISO );  
+    SPI.begin();
+
     Wire1.setSDA(PIN_I2C1_SDA);
     Wire1.setSCL(PIN_I2C1_SCL);
     Wire1.begin();

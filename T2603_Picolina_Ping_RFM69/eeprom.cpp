@@ -17,7 +17,7 @@ void eeprom_initialize(void) {
         Serial.println("Found I2C EEPROM");
     } else {
         Serial.println("I2C EEPROM not identified ... check your connections?\r\n");
-        while (1) delay(10);
+        //while (1) delay(10);
     }
 }
 

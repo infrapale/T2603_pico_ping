@@ -6,13 +6,19 @@
 #define PIN_I2C0_SDA    (4u)
 #define PIN_I2C0_SCL    (5u)
 
+#define  WireX    Wire
 void setup() {
   Serial.begin(9600);         // Start serial communication
   while (!Serial);            // Wait for Serial Monitor (for boards like Leonardo)
   // Initialize I2C
+  Wire.setSDA(PIN_I2C0_SDA);
+  Wire.setSCL(PIN_I2C0_SCL);
+
   Wire1.setSDA(PIN_I2C1_SDA);
   Wire1.setSCL(PIN_I2C1_SCL);
-  Wire1.begin();
+
+  WireX.begin();
+
 
   Serial.println("\nI2C Scanner");
 }
@@ -25,8 +31,8 @@ void loop() {
 
   // I2C addresses range from 1 to 127
   for (address = 1; address < 127; address++) {
-    Wire1.beginTransmission(address);
-    error = Wire1.endTransmission();
+    WireX.beginTransmission(address);
+    error = WireX.endTransmission();
 
     if (error == 0) {
       Serial.print("I2C device found at address 0x");
