@@ -5,7 +5,7 @@
 
 // WiFi Access Point
 // #define PIRPANA
-// #define LILLA_ASTRID
+//#define LILLA_ASTRID
 #define VILLA_ASTRID
 
 #define DEBUG_PRINT 

@@ -151,9 +151,16 @@ void ping_task(void)
             Serial.println(ping.buffer);    
             Serial1.println(ping.buffer);    
             rfm69_modem.radiate(ping.buffer);
+            ping.state = 205;
+            ping.next_try = millis() + 5000;
+            break;
+        case 205:
+            strftime(ping.buffer, sizeof(ping.buffer), "<T;#;PING;%Y;%m;%d;%H;%M>", &ping.timeinfo);
+            Serial.println(ping.buffer);    
+            Serial1.println(ping.buffer);    
+            rfm69_modem.radiate(ping.buffer);
             ping.state = 210;
             ping.next_try = millis() + PING_INTERVAL_ms;
-            break;
         case 210:
             if(millis() > ping.next_try){
                 Serial.println("Testing again..");
